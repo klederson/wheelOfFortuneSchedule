@@ -1,0 +1,11 @@
+{
+    "require": {
+        "silex/silex": "~2.0",
+        "phpunit/phpunit": "^6.4"
+    },
+    "autoload": {
+        "psr-0": {
+            "": "src/"
+        }
+    }
+}
