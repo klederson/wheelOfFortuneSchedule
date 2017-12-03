@@ -13,9 +13,9 @@ class WheelOfFortuneFacade
      *
      * @return array
      */
-    public function getSupportSchedule(int $days, array $developers)
+    public function getRandomisedShifts(int $days, array $developers)
     {
-        return WheelOfFortuneModel::getDevelopersSchedule($days, $developers);
+        return WheelOfFortuneModel::randomiseShifts($days, $developers);
     }
 
     /**
@@ -26,6 +26,10 @@ class WheelOfFortuneFacade
      */
     public function spinTheWheel(int $days, array $developers)
     {
-        return $this->getSupportSchedule($days, $developers);
+        return $this->getRandomisedShifts($days, $developers);
+    }
+
+    public function getDeveloperShifts(string $uuid) {
+        return WheelOfFortuneModel::getDeveloperShifts($uuid);
     }
 }

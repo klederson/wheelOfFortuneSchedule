@@ -24,9 +24,9 @@ class WheelOfFortuneFacadeTest extends TestCase
         $facade = $this->getFacade();
         $developers = $this->getDevelopersFacade()->getDevelopers();
 
-        $schedule = $facade->getSupportSchedule(10, $developers);
+        $schedule = $facade->getRandomisedShifts(10, $developers);
 
-        foreach($schedule['days'] as $dayIndex => $dayAssignments) {
+        foreach($schedule as $dayIndex => $dayAssignments) {
             $this->assertTrue(count($dayAssignments) === 2);
             $this->assertNotEquals($dayAssignments[0], $dayAssignments[1]);
         }
@@ -39,21 +39,40 @@ class WheelOfFortuneFacadeTest extends TestCase
         $facade = $this->getFacade();
         $developers = $this->getDevelopersFacade()->getDevelopers();
 
-        $schedule = $facade->getSupportSchedule(rand(10,10000), $developers);
-        $currentDate = new \DateTime();
+        $schedule = $facade->getRandomisedShifts(10, $developers);
 
-        foreach($schedule['days'] as $dayIndex => $dayAssignments) {
-            $newDate = new \DateTime($dayIndex);
-            $interval = $currentDate->diff($newDate);
-            $dayIndexInterval = $interval->format('%a');
+        foreach($schedule as $dayIndex => $dayAssignments) {
+            $previousDay = $dayIndex > 0 ? $dayIndex - 1 : $dayIndex;
 
-            $previousDay = $dayIndexInterval === "0" ? $newDate : $newDate->modify("-1 days");
-            $previousDayIndex = $previousDay->format("Y-m-d");
-
-            $this->assertTrue(count($schedule['days'][$previousDayIndex]) === 2);
+            $this->assertTrue(count($schedule[$previousDay]) === 2);
 
             foreach($dayAssignments as $uuid) {
-                $this->assertNotEquals($uuid, $schedule['days'][$previousDayIndex]);
+                $this->assertNotEquals($uuid, $schedule[$previousDay]);
+            }
+        }
+    }
+
+    public function testEachEngineerShouldHaveCompletedOneWholeDayOfSupportInAny2WeekPeriod()
+    {
+        //Each engineer should have completed one whole day of support in any 2 week period
+        ini_set('memory_limit', '1024M');
+
+        $minTime = 5;
+
+        $facade = $this->getFacade();
+        $developers = $this->getDevelopersFacade()->getDevelopers();
+
+        $schedule = $facade->getRandomisedShifts(20, $developers);
+
+        foreach($developers as $developer) {
+            $previousDay = null;
+            $uuid = $developer->getUuid();
+
+            $developerShifts = $facade->getDeveloperShifts($uuid);
+
+            $previousShift = false;
+            foreach($developerShifts as $shift) {
+                $this->assertNotTrue($shift - $previousShift > $minTime && $previousShift !== false);
             }
         }
     }

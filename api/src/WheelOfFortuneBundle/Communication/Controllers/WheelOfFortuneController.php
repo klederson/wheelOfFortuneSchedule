@@ -20,6 +20,6 @@ class WheelOfFortuneController
         $developersFacade = new DevelopersFacade();
         $developers = $developersFacade->getDevelopers();
 
-        return new JsonResponse($this->facade->getSupportSchedule(10, $developers));
+        return new JsonResponse($this->facade->getRandomisedShifts(10, $developers));
     }
 }
